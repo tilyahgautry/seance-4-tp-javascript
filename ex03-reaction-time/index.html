@@ -117,7 +117,7 @@ const pad = document.querySelector('#zone-reaction');
 /* [Trou 1] Même principe que pour pad : le sélecteur doit correspondre exactement à l’attribut id
    de l’élément qui affiche le nombre de millisecondes (voir le HTML au-dessus). Si ce n’est pas
    le bon nœud, la suite lèvera une erreur ou n’affichera rien au bon endroit. */
-const msEl = document.querySelector('#resultat_ms');
+const msEl = document.querySelector('#resultat-ms');
 
 /* --- État du jeu (partagé entre le clavier, le timer et le clic) --- */
 
@@ -133,8 +133,6 @@ function resetEtat() {
     clearTimeout(to);
     to = null;
   }
-  greenAt = 0;
-  pad.classList.remove('vert');
   pad.textContent = messageAccueil;
   msEl.textContent = '–';
 }
@@ -151,7 +149,7 @@ function lancerManche() {
        depuis une origine fixe (voir doc MDN sur l’objet Date). Le 0 ci-dessous est un placeholder :
        il faut une valeur qui reflète l’instant présent, sinon le gestionnaire de clic ne pourra pas
        mesurer un écart avec Date.now() au moment du clic. */
-    greenAt = 0;
+    greenAt = Date.now();
   }, 500 + rand(2000));
 }
 
@@ -163,7 +161,7 @@ document.addEventListener('keydown', function (event) {
   /* [Bug 1] La barre d’espace : event.key === 'Space' peut être vrai dans certains environnements
      mais pas de façon fiable partout. Combine plutôt event.code === 'Space' et/ou event.key === ' '
      (voir README). Ouvre la doc KeyboardEvent ou affiche event dans la console si besoin. */
-  if (event.key === 'Space') {
+  if (event.key === 'Space' || event.key===' ') {
     event.preventDefault();
     lancerManche();
     return;
@@ -181,11 +179,12 @@ pad.addEventListener('click', function () {
     var ms = Date.now() - greenAt;
     msEl.textContent = String(ms);
     greenAt = 0;
+    pad.classList.remove('vert');
+    pad.textContent = messageAccueil;
     /* [Bug 2] Après un clic valide, le bouton doit redevenir gris et afficher le message d’accueil,
        mais le nombre de ms vient d’être écrit dans msEl : quelle fonction du script remet aussi
        ce résultat à « – » ? Trouve un moyen d’obtenir le même effet visuel sur le bouton sans
        repasser par une réinitialisation complète de l’affichage du résultat. */
-    resetEtat();
     return;
   }
   if (to !== null) {
